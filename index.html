@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yash Bishnoi, ML engineer</title>
+  <meta name="description" content="Yash Bishnoi is an ML engineer in Glasgow who fixes LLM training and inference at the kernel level, contributes upstream to PyTorch and bitsandbytes, and reproduces language models bit-exact.">
+  <meta property="og:title" content="Yash Bishnoi, ML engineer">
+  <meta property="og:description" content="LLM performance work: kernels, quantisation and controlled experiments, with the wins and nulls on one axis.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yashb98.github.io/">
+  <meta property="og:image" content="https://yashb98.github.io/assets/yash.jpg">
+  <link rel="canonical" href="https://yashb98.github.io/">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Hepta+Slab:wght@450;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#results">Skip to results</a>
+
+  <header class="band hero">
+    <div class="margin">
+      <p class="who">Yash Bishnoi</p>
+      <p class="where">ML engineer, Glasgow</p>
+    </div>
+    <div class="main">
+      <div class="hero-top">
+        <h1>I fix LLM training and inference at the kernel level, then prove the result.</h1>
+        <img class="portrait" src="assets/yash.jpg" alt="Portrait of Yash Bishnoi" width="460" height="460">
+      </div>
+      <div class="hero-body">
+        <div>
+          <p>I work in PyTorch, Triton, CUDA and quantisation on an NVIDIA GB10. My fixes run upstream in PyTorch, Helion and bitsandbytes, and I've rebuilt two language models bit-exact from scratch.</p>
+          <p>I'm open to ML engineering roles in the UK or remote, and to relocating. I don't need UK sponsorship.</p>
+          <ul class="actions">
+            <li><a class="primary" href="mailto:bishnoiyash274@gmail.com">Email me</a></li>
+            <li><a href="call.html">Book a call</a></li>
+            <li><a href="assets/Yash_Bishnoi_CV.pdf">Download my CV</a></li>
+            <li><a href="https://www.linkedin.com/in/yash-bishnoi/">Message me on LinkedIn</a></li>
+          </ul>
+          <ul class="links">
+            <li><a href="contributions.html">Contributions</a></li>
+            <li><a href="https://github.com/yashb98">GitHub</a></li>
+            <li><a href="https://huggingface.co/bishnoiyash">Hugging Face</a></li>
+            <li><a href="https://www.kaggle.com/yashbishnoi98">Kaggle</a></li>
+          </ul>
+        </div>
+        <figure class="parity">
+          <figcaption>One parity check on Qwen3-0.6B</figcaption>
+          <dl>
+            <div><dt>Prompt</dt><dd>The capital of France is</dd></div>
+            <div><dt>Official weights say</dt><dd>Paris</dd></div>
+            <div><dt>My single-file build says</dt><dd>Paris</dd></div>
+            <div class="zero"><dt>Largest logit difference</dt><dd>0.0</dd></div>
+          </dl>
+          <p>On fp32 and CPU, for this one prompt. <a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/results/parity.json">See the result</a></p>
+        </figure>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="band" id="results">
+      <div class="margin"><h2>Results, good and bad</h2></div>
+      <div class="main">
+        <p class="lede">Seven controlled changes to Qwen3-0.6B, each tested at matched compute across three seeds and scored on held-out text. A point to the right of zero means the model predicts that text better, in bits per byte. Filter the results, then open any row to see what happened. All of it ran on one NVIDIA GB10 box.</p>
+        <ul class="key">
+          <li><i class="fp-pt effect"></i>The 95% interval clears zero, so it counts as an effect</li>
+          <li><i class="fp-pt null"></i>The interval touches zero, so it's a null</li>
+        </ul>
+        <div class="fp-tools" hidden>
+          <div class="seg" role="group" aria-label="Filter by outcome">
+            <button type="button" data-kind="all" aria-pressed="true">All</button>
+            <button type="button" data-kind="effect" aria-pressed="false">Effects</button>
+            <button type="button" data-kind="null" aria-pressed="false">Nulls</button>
+          </div>
+          <div class="seg" role="group" aria-label="Choose the text scored">
+            <button type="button" data-corpus="both" aria-pressed="true">Both texts</button>
+            <button type="button" data-corpus="english" aria-pressed="false">English</button>
+            <button type="button" data-corpus="code" aria-pressed="false">Python code</button>
+          </div>
+          <button class="seg-toggle" type="button" id="fp-seeds" aria-pressed="false">Show each seed</button>
+          <p class="fp-count" aria-live="polite"></p>
+        </div>
+        <!-- results:start -->
+<div class="fp" style="--zero:11.11%">
+<div class="fp-head" aria-hidden="true">
+  <span class="fp-name"></span>
+  <span class="fp-axis cell-english"><b>English text</b><span class="fp-tick" style="left:11.11%">0</span><span class="fp-tick" style="left:33.33%">0.2</span><span class="fp-tick" style="left:55.56%">0.4</span><span class="fp-tick" style="left:77.78%">0.6</span><span class="fp-tick" style="left:100.00%">0.8</span></span>
+  <span class="fp-val cell-english"></span>
+  <span class="fp-axis cell-code"><b>Python code</b><span class="fp-tick" style="left:11.11%">0</span><span class="fp-tick" style="left:33.33%">0.2</span><span class="fp-tick" style="left:55.56%">0.4</span><span class="fp-tick" style="left:77.78%">0.6</span><span class="fp-tick" style="left:100.00%">0.8</span></span>
+  <span class="fp-val cell-code"></span>
+</div>
+<details class="fp-row" data-english="null" data-code="effect">
+  <summary>
+    <span class="fp-name">Swap the training data to dclm-edu<small>131M tokens</small></span>
+    <span class="fp-plot cell-english" role="img" aria-label="English: −0.010, 95% interval −0.026 to +0.006" title="English: −0.010, 95% interval −0.026 to +0.006"><i class="fp-ci null" style="left:8.27%;width:3.52%"></i><i class="fp-pt null" style="left:10.03%"></i><i class="fp-seed" style="left:10.47%"></i><i class="fp-seed" style="left:9.33%"></i><i class="fp-seed" style="left:10.30%"></i></span>
+    <span class="fp-val cell-english">−0.010</span>
+    <span class="fp-plot cell-code" role="img" aria-label="Code: +0.703, 95% interval +0.664 to +0.743" title="Code: +0.703, 95% interval +0.664 to +0.743"><i class="fp-ci effect" style="left:84.88%;width:8.78%"></i><i class="fp-pt effect" style="left:89.27%"></i><i class="fp-seed" style="left:90.28%"></i><i class="fp-seed" style="left:88.72%"></i><i class="fp-seed" style="left:88.82%"></i></span>
+    <span class="fp-val cell-code">+0.703</span>
+  </summary>
+  <div class="fp-note">
+    <p>The largest effect in the study came from changing the data alone. Code gained 0.70 bits per byte and English did not move.</p>
+    <p class="fp-source">English −0.010, interval −0.026 to +0.006, seeds −0.006, −0.016, −0.007.</p>
+    <p class="fp-source">Code +0.703, interval +0.664 to +0.743, seeds +0.713, +0.699, +0.699.</p>
+    <p class="fp-source"><a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/experiments/2026-06-24_qwen3-0.6b_data-dclm-vs-fineweb/verdict.json">Results file</a></p>
+  </div>
+</details>
+<details class="fp-row" data-english="null" data-code="effect">
+  <summary>
+    <span class="fp-name">Blend the data 50/50<small>131M tokens</small></span>
+    <span class="fp-plot cell-english" role="img" aria-label="English: +0.016, 95% interval −0.001 to +0.033" title="English: +0.016, 95% interval −0.001 to +0.033"><i class="fp-ci null" style="left:11.06%;width:3.69%"></i><i class="fp-pt null" style="left:12.90%"></i><i class="fp-seed" style="left:13.03%"></i><i class="fp-seed" style="left:11.53%"></i><i class="fp-seed" style="left:14.13%"></i></span>
+    <span class="fp-val cell-english">+0.016</span>
+    <span class="fp-plot cell-code" role="img" aria-label="Code: +0.590, 95% interval +0.553 to +0.628" title="Code: +0.590, 95% interval +0.553 to +0.628"><i class="fp-ci effect" style="left:72.58%;width:8.27%"></i><i class="fp-pt effect" style="left:76.71%"></i><i class="fp-seed" style="left:76.63%"></i><i class="fp-seed" style="left:74.82%"></i><i class="fp-seed" style="left:78.69%"></i></span>
+    <span class="fp-val cell-code">+0.590</span>
+  </summary>
+  <div class="fp-note">
+    <p>The blend kept about 84% of the code gain and held English steady, so this mix went forward into mid-training.</p>
+    <p class="fp-source">English +0.016, interval −0.001 to +0.033, seeds +0.017, +0.004, +0.027.</p>
+    <p class="fp-source">Code +0.590, interval +0.553 to +0.628, seeds +0.590, +0.573, +0.608.</p>
+    <p class="fp-source"><a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/experiments/2026-06-26_qwen3-0.6b_data-mix-composition/verdict.json">Results file</a></p>
+  </div>
+</details>
+<details class="fp-row" data-english="effect" data-code="effect">
+  <summary>
+    <span class="fp-name">Replace AdamW with NorMuon<small>42M tokens, early training only</small></span>
+    <span class="fp-plot cell-english" role="img" aria-label="English: +0.474, 95% interval +0.443 to +0.505" title="English: +0.474, 95% interval +0.443 to +0.505"><i class="fp-ci effect" style="left:60.39%;width:6.85%"></i><i class="fp-pt effect" style="left:63.81%"></i><i class="fp-seed" style="left:61.68%"></i><i class="fp-seed" style="left:64.18%"></i><i class="fp-seed" style="left:65.59%"></i></span>
+    <span class="fp-val cell-english">+0.474</span>
+    <span class="fp-plot cell-code" role="img" aria-label="Code: +0.502, 95% interval +0.456 to +0.547" title="Code: +0.502, 95% interval +0.456 to +0.547"><i class="fp-ci effect" style="left:61.78%;width:10.13%"></i><i class="fp-pt effect" style="left:66.84%"></i><i class="fp-seed" style="left:68.40%"></i><i class="fp-seed" style="left:62.44%"></i><i class="fp-seed" style="left:69.68%"></i></span>
+    <span class="fp-val cell-code">+0.502</span>
+  </summary>
+  <div class="fp-note">
+    <p>This edge fades with budget. Across the token ladder the English gap falls from 0.474 to 0.072, and at the top rung the fitted edge sits inside the noise floor. Code keeps a resolved edge.</p>
+    <p class="fp-source">English +0.474, interval +0.443 to +0.505, seeds +0.455, +0.478, +0.490.</p>
+    <p class="fp-source">Code +0.502, interval +0.456 to +0.547, seeds +0.516, +0.462, +0.527.</p>
+    <p class="fp-source"><a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/experiments/2026-06-16_qwen3_normuon-vs-adamw/results/verdict.json">Results file</a> and <a href="https://github.com/yashb98/BuildFromScratch/blob/a8ff1247471f6ddb2e85910561d2da632342fda8/README.md">Budget ladder</a></p>
+  </div>
+</details>
+<details class="fp-row" data-english="effect" data-code="effect">
+  <summary>
+    <span class="fp-name">Add three architecture modules<small>131M tokens</small></span>
+    <span class="fp-plot cell-english" role="img" aria-label="English: +0.118, 95% interval +0.100 to +0.135" title="English: +0.118, 95% interval +0.100 to +0.135"><i class="fp-ci effect" style="left:22.27%;width:3.88%"></i><i class="fp-pt effect" style="left:24.21%"></i><i class="fp-seed" style="left:24.81%"></i><i class="fp-seed" style="left:23.00%"></i><i class="fp-seed" style="left:24.82%"></i></span>
+    <span class="fp-val cell-english">+0.118</span>
+    <span class="fp-plot cell-code" role="img" aria-label="Code: +0.305, 95% interval +0.259 to +0.351" title="Code: +0.305, 95% interval +0.259 to +0.351"><i class="fp-ci effect" style="left:39.86%;width:10.26%"></i><i class="fp-pt effect" style="left:44.99%"></i><i class="fp-seed" style="left:43.90%"></i><i class="fp-seed" style="left:45.92%"></i><i class="fp-seed" style="left:45.14%"></i></span>
+    <span class="fp-val cell-code">+0.305</span>
+  </summary>
+  <div class="fp-note">
+    <p>Value residual, layernorm scaling and head gating. Each one is significant on its own when tested separately.</p>
+    <p class="fp-source">English +0.118, interval +0.100 to +0.135, seeds +0.123, +0.107, +0.123.</p>
+    <p class="fp-source">Code +0.305, interval +0.259 to +0.351, seeds +0.295, +0.313, +0.306.</p>
+    <p class="fp-source"><a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/experiments/2026-06-18_qwen3-0.6b_imu1-deconfound-p1/verdict.json">Results file</a> and <a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/results/arch_subdrill.json">Per-module results</a></p>
+  </div>
+</details>
+<details class="fp-row" data-english="effect" data-code="effect">
+  <summary>
+    <span class="fp-name">Anneal on the 50/50 mix<small>150M tokens</small></span>
+    <span class="fp-plot cell-english" role="img" aria-label="English: +0.016, 95% interval +0.014 to +0.017" title="English: +0.016, 95% interval +0.014 to +0.017"><i class="fp-ci effect" style="left:12.67%;width:0.38%"></i><i class="fp-pt effect" style="left:12.86%"></i><i class="fp-seed" style="left:12.92%"></i><i class="fp-seed" style="left:12.76%"></i><i class="fp-seed" style="left:12.90%"></i></span>
+    <span class="fp-val cell-english">+0.016</span>
+    <span class="fp-plot cell-code" role="img" aria-label="Code: +0.272, 95% interval +0.264 to +0.279" title="Code: +0.272, 95% interval +0.264 to +0.279"><i class="fp-ci effect" style="left:40.45%;width:1.68%"></i><i class="fp-pt effect" style="left:41.29%"></i><i class="fp-seed" style="left:41.29%"></i><i class="fp-seed" style="left:41.00%"></i><i class="fp-seed" style="left:41.58%"></i></span>
+    <span class="fp-val cell-code">+0.272</span>
+  </summary>
+  <div class="fp-note">
+    <p>The control took the same learning-rate cooldown on FineWeb-Edu alone, so the data carries this gain and the schedule does not. I expected no change on English; it moved slightly.</p>
+    <p class="fp-source">English +0.016, interval +0.014 to +0.017, seeds +0.016, +0.015, +0.016.</p>
+    <p class="fp-source">Code +0.272, interval +0.264 to +0.279, seeds +0.272, +0.269, +0.274.</p>
+    <p class="fp-source"><a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/experiments/2026-06-30_qwen3-0.6b_midtrain-anneal/verdict.json">Results file</a></p>
+  </div>
+</details>
+<details class="fp-row" data-english="null" data-code="null">
+  <summary>
+    <span class="fp-name">Use a warmup-stable-decay schedule<small>131M tokens</small></span>
+    <span class="fp-plot cell-english" role="img" aria-label="English: +0.024, 95% interval −0.017 to +0.066" title="English: +0.024, 95% interval −0.017 to +0.066"><i class="fp-ci null" style="left:9.19%;width:9.27%"></i><i class="fp-pt null" style="left:13.83%"></i><i class="fp-seed" style="left:12.30%"></i><i class="fp-seed" style="left:14.47%"></i><i class="fp-seed" style="left:14.71%"></i></span>
+    <span class="fp-val cell-english">+0.024</span>
+    <span class="fp-plot cell-code" role="img" aria-label="Code: +0.036, 95% interval −0.065 to +0.137" title="Code: +0.036, 95% interval −0.065 to +0.137"><i class="fp-ci null" style="left:3.90%;width:22.46%"></i><i class="fp-pt null" style="left:15.13%"></i><i class="fp-seed" style="left:10.82%"></i><i class="fp-seed" style="left:17.42%"></i><i class="fp-seed" style="left:17.14%"></i></span>
+    <span class="fp-val cell-code">+0.036</span>
+  </summary>
+  <div class="fp-note">
+    <p>The interval crosses zero on both corpora, so the study claims nothing for this schedule.</p>
+    <p class="fp-source">English +0.024, interval −0.017 to +0.066, seeds +0.011, +0.030, +0.032.</p>
+    <p class="fp-source">Code +0.036, interval −0.065 to +0.137, seeds −0.003, +0.057, +0.054.</p>
+    <p class="fp-source"><a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/experiments/2026-06-18_qwen3-0.6b_imu1-deconfound-p1/verdict.json">Results file</a></p>
+  </div>
+</details>
+<details class="fp-row" data-english="null" data-code="null">
+  <summary>
+    <span class="fp-name">Add z-loss<small>131M tokens</small></span>
+    <span class="fp-plot cell-english" role="img" aria-label="English: −0.003, 95% interval −0.018 to +0.011" title="English: −0.003, 95% interval −0.018 to +0.011"><i class="fp-ci null" style="left:9.16%;width:3.15%"></i><i class="fp-pt null" style="left:10.74%"></i><i class="fp-seed" style="left:10.60%"></i><i class="fp-seed" style="left:10.41%"></i><i class="fp-seed" style="left:11.19%"></i></span>
+    <span class="fp-val cell-english">−0.003</span>
+    <span class="fp-plot cell-code" role="img" aria-label="Code: −0.001, 95% interval −0.052 to +0.051" title="Code: −0.001, 95% interval −0.052 to +0.051"><i class="fp-ci null" style="left:5.31%;width:11.45%"></i><i class="fp-pt null" style="left:11.03%"></i><i class="fp-seed" style="left:8.99%"></i><i class="fp-seed" style="left:12.32%"></i><i class="fp-seed" style="left:11.79%"></i></span>
+    <span class="fp-val cell-code">−0.001</span>
+  </summary>
+  <div class="fp-note">
+    <p>No measurable effect on either corpus.</p>
+    <p class="fp-source">English −0.003, interval −0.018 to +0.011, seeds −0.005, −0.006, +0.001.</p>
+    <p class="fp-source">Code −0.001, interval −0.052 to +0.051, seeds −0.019, +0.011, +0.006.</p>
+    <p class="fp-source"><a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/experiments/2026-06-18_qwen3-0.6b_imu1-deconfound-p1/verdict.json">Results file</a></p>
+  </div>
+</details>
+</div>
+<details class="fp-table">
+  <summary>Show these results as a table</summary>
+  <div class="fp-table-scroll">
+  <table>
+    <thead><tr><th scope="col">Change</th><th scope="col">Budget</th><th scope="col">English</th><th scope="col">95% interval</th><th scope="col">Code</th><th scope="col">95% interval</th><th scope="col">Source</th></tr></thead>
+    <tbody>
+<tr><th scope="row">Swap the training data to dclm-edu</th><td>131M tokens</td><td>−0.0097</td><td>−0.0255 to +0.0061</td><td>+0.7034</td><td>+0.6639 to +0.7430</td><td><a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/experiments/2026-06-24_qwen3-0.6b_data-dclm-vs-fineweb/verdict.json">Results file</a></td></tr>
+<tr><th scope="row">Blend the data 50/50</th><td>131M tokens</td><td>+0.0161</td><td>−0.0005 to +0.0327</td><td>+0.5904</td><td>+0.5532 to +0.6277</td><td><a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/experiments/2026-06-26_qwen3-0.6b_data-mix-composition/verdict.json">Results file</a></td></tr>
+<tr><th scope="row">Replace AdamW with NorMuon</th><td>42M tokens, early training only</td><td>+0.4743</td><td>+0.4435 to +0.5052</td><td>+0.5016</td><td>+0.4560 to +0.5471</td><td><a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/experiments/2026-06-16_qwen3_normuon-vs-adamw/results/verdict.json">Results file</a></td></tr>
+<tr><th scope="row">Add three architecture modules</th><td>131M tokens</td><td>+0.1179</td><td>+0.1005 to +0.1354</td><td>+0.3049</td><td>+0.2588 to +0.3511</td><td><a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/experiments/2026-06-18_qwen3-0.6b_imu1-deconfound-p1/verdict.json">Results file</a></td></tr>
+<tr><th scope="row">Anneal on the 50/50 mix</th><td>150M tokens</td><td>+0.0157</td><td>+0.0140 to +0.0174</td><td>+0.2716</td><td>+0.2641 to +0.2792</td><td><a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/experiments/2026-06-30_qwen3-0.6b_midtrain-anneal/verdict.json">Results file</a></td></tr>
+<tr><th scope="row">Use a warmup-stable-decay schedule</th><td>131M tokens</td><td>+0.0245</td><td>−0.0173 to +0.0662</td><td>+0.0361</td><td>−0.0649 to +0.1372</td><td><a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/experiments/2026-06-18_qwen3-0.6b_imu1-deconfound-p1/verdict.json">Results file</a></td></tr>
+<tr><th scope="row">Add z-loss</th><td>131M tokens</td><td>−0.0034</td><td>−0.0175 to +0.0108</td><td>−0.0007</td><td>−0.0522 to +0.0508</td><td><a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/experiments/2026-06-18_qwen3-0.6b_imu1-deconfound-p1/verdict.json">Results file</a></td></tr>
+    </tbody>
+  </table>
+  </div>
+</details>
+<!-- results:end -->
+
+        <div class="offaxis">
+          <article>
+            <h3>The win that wasn't</h3>
+            <p>Response-masked fine-tuning looked like a 0.68 perplexity win with a very tight interval. The two arms had been scored on different tokens. On one fixed held-out set the gap fell to 0.009, and a full-sequence check flipped its sign.</p>
+            <p><a href="writing/the-win-that-was-not.html">Read how it collapsed</a></p>
+          </article>
+          <article>
+            <h3>A null called in advance</h3>
+            <p>I pre-registered that GRPO wouldn't help at this size, because the base model solves about 1% of maths problems. After 300 steps it scored 1.0% on GSM8K against 1.12% for the fine-tuned floor, and it didn't beat a random-reward control. This run used a single seed, as registered.</p>
+            <p><a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/results/grpo_null.json">See the null result</a></p>
+          </article>
+        </div>
+        <p class="more"><a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/research/papers/qwen3-0.6b-study/qwen3-0.6b-study.pdf">Read the full study</a> or <a href="https://github.com/yashb98/BuildFromScratch">browse the code</a>. The repo also holds a SmolLM2-135M build that is bit-exact on CPU, and records how far it drifts on GPU.</p>
+      </div>
+    </section>
+
+    <section class="band" id="gb10">
+      <div class="margin"><h2>Inside a GB10 fix</h2></div>
+      <div class="main">
+        <p class="lede">New GPUs expose assumptions that older ones never tested. Here's one bug from my GB10, from failure to merged fix in PyTorch Helion.</p>
+        <div class="fix" data-stepper>
+          <div class="fix-tabs" role="tablist" aria-label="Stages of the fix" hidden>
+            <button type="button" role="tab" id="fix-tab-1" aria-controls="fix-1" aria-selected="true">The failure</button>
+            <button type="button" role="tab" id="fix-tab-2" aria-controls="fix-2" aria-selected="false" tabindex="-1">The cause</button>
+            <button type="button" role="tab" id="fix-tab-3" aria-controls="fix-3" aria-selected="false" tabindex="-1">The fix</button>
+            <button type="button" role="tab" id="fix-tab-4" aria-controls="fix-4" aria-selected="false" tabindex="-1">The proof</button>
+          </div>
+          <section class="fix-panel" id="fix-1" role="tabpanel" aria-labelledby="fix-tab-1">
+            <h3>A test fails with an out-of-resources error</h3>
+            <p><code>test_scaled_mm</code> failed on my GB10 before a single kernel could run.</p>
+            <pre><code>OutOfResources: out of resource: shared memory,
+Required: 147456, Hardware limit: 101376.</code></pre>
+            <div class="meter" role="img" aria-label="The kernel needed 147,456 bytes of shared memory and the GB10 limit is 101,376 bytes.">
+              <div class="meter-limit" style="left:63.36%"><span>GB10 limit, 101,376 bytes</span></div>
+              <div class="meter-row"><span>Needed</span><i style="width:92.16%"></i><b>147,456 bytes</b></div>
+            </div>
+          </section>
+          <section class="fix-panel" id="fix-2" role="tabpanel" aria-labelledby="fix-tab-2">
+            <h3>The GPU borrowed a config from an older chip</h3>
+            <p>GB10 had no heuristic file of its own, so the loader fell back to the sm90 file, whose configs were tuned on H100 with 227 KB of shared memory per block. The test checked for FP8 support but not for shared memory, so it ran a config that could never launch.</p>
+          </section>
+          <section class="fix-panel" id="fix-3" role="tabpanel" aria-labelledby="fix-tab-3">
+            <h3>Two changes</h3>
+            <p>First, I guarded the test with the existing shared-memory check at 147,456 bytes, so it skips on smaller GPUs, GB10 included, and H100-class hardware still runs it.</p>
+            <p>Second, I generated an sm121 heuristic file on the GB10 for the two test shapes. One config covers both, at most 1.02× slower than the best per-shape config, and it fits the limit. This was a correctness fix, tuned quickly on two shapes, not a full performance pretune.</p>
+          </section>
+          <section class="fix-panel" id="fix-4" role="tabpanel" aria-labelledby="fix-tab-4">
+            <h3>The suite goes from 2 failures to 0</h3>
+            <dl class="fix-stats">
+              <div><dt>Before, on GB10</dt><dd>2 failed</dd></div>
+              <div><dt>After, on GB10, with the test skipped</dt><dd>0 failed</dd></div>
+              <div><dt>New heuristic against fp32, run with the guard bypassed</dt><dd>0.0 max error</dd></div>
+            </dl>
+            <p>It <a href="https://github.com/pytorch/helion/pull/3415">merged on 20 August 2026</a>. The wider problem is in <a href="https://github.com/pytorch/helion/pull/4097">Helion #4097</a>, in review: on a GB10 with only the sm90 file, 19 of 24 decode shapes failed at first launch.</p>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="upstream">
+      <div class="margin"><h2>Merged upstream</h2></div>
+      <div class="main">
+        <ol class="ledger">
+          <li>
+            <h3><a href="https://github.com/pytorch/pytorch/commit/075742a095">PyTorch, commit 075742a</a></h3>
+            <p>Split OrderedSetVariable off SetVariable in TorchDynamo, so an <code>OrderedSet</code> keeps its order under <code>torch.compile</code>.</p>
+            <time datetime="2026-09-17">17 Sep 2026</time>
+          </li>
+          <li>
+            <h3><a href="https://github.com/pytorch/pytorch/commit/59f3b80152">PyTorch, commit 59f3b80</a></h3>
+            <p>Split FrozensetVariable off SetVariable in TorchDynamo so <code>torch.compile</code> matches CPython.</p>
+            <time datetime="2026-08-18">18 Aug 2026</time>
+          </li>
+          <li>
+            <h3><a href="https://github.com/bitsandbytes-foundation/bitsandbytes/pull/2039">bitsandbytes #2039</a></h3>
+            <p>Added sm121 to the <code>wide_n_simt</code> rule in 4-bit GEMM dispatch.</p>
+            <time datetime="2026-08-18">18 Aug 2026</time>
+          </li>
+          <li>
+            <h3><a href="https://github.com/bitsandbytes-foundation/bitsandbytes/pull/2030">bitsandbytes #2030</a></h3>
+            <p>Added an sm121 tier to the 4-bit GEMM heuristic. To prove nothing else changed, I enumerated all 60,720 dispatch decisions in the test grid: 216 changed, and every one was on sm121.</p>
+            <time datetime="2026-08-13">13 Aug 2026</time>
+          </li>
+        </ol>
+        <p class="more"><a href="contributions.html">See all 23 pull requests</a>, with what each one fixed and how it turned out, including the 9 that didn't land. My ONNX MatMul documentation patch has also been accepted through the ONNX Slack, and the public pull request is still to come.</p>
+      </div>
+    </section>
+
+    <section class="band" id="writing">
+      <div class="margin"><h2>Writing</h2></div>
+      <div class="main">
+        <dl class="builds">
+          <div>
+            <dt><a href="writing/killing-the-10-gb-tensor.html">Killing the 10 GB Tensor</a></dt>
+            <dd>How fused cross-entropy deletes a training tensor that exists only to become one number, and how I proved it changes nothing.</dd>
+          </div>
+          <div>
+            <dt><a href="writing/the-win-that-was-not.html">The Win That Was Not</a></dt>
+            <dd>A tight, significant 0.68 perplexity win that turned out to be an artifact of scoring two arms on different tokens.</dd>
+          </div>
+          <div>
+            <dt><a href="writing/what-the-gates-caught.html">What the Gates Caught</a></dt>
+            <dd>Seven ways my own study tried to fool me, and how each one was caught or disclosed.</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="band" id="interpretability">
+      <div class="margin"><h2>Interpretability</h2></div>
+      <div class="main prose">
+        <h3>Reproducing a paper turned into co-authoring its revision</h3>
+        <p>I reproduced the central result of Evan Duan's paper on steering side effects in sparse autoencoders. On GPT-2-small, decoder crowding predicted downstream collateral at a Spearman of 0.482 [0.381, 0.571], against the published 0.466. My first notebook scored 0.548 before I removed contexts ending in padding.</p>
+        <p>The paper hadn't controlled its collateral labels for firing frequency, so I ran that control across all four of its model and SAE settings. I'm now co-authoring the revision.</p>
+        <ul class="links">
+          <li><a href="https://huggingface.co/blog/bishnoiyash/decoder-crowding-predicts-sae-steering-side-effect">Read the write-up</a></li>
+          <li><a href="https://www.kaggle.com/code/yashbishnoi98/sae-steering-side-effects-reproduced">Run the notebook</a></li>
+          <li><a href="https://github.com/yashb98/sae-steering-collateral-residualization">See the code and results</a></li>
+          <li><a href="https://arxiv.org/abs/2606.08365">Read the original paper</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="band" id="built">
+      <div class="margin"><h2>Other things I've built</h2></div>
+      <div class="main">
+        <dl class="builds">
+          <div>
+            <dt><a href="https://github.com/yashb98/Velox_AI">Velox AI</a></dt>
+            <dd>A platform for AI voice agents that answer real phone calls, with a visual flow builder, multi-agent routing and hybrid RAG. TypeScript, Twilio, Deepgram, Gemini.</dd>
+          </div>
+          <div>
+            <dt><a href="https://github.com/yashb98/multi-agent-patterns">multi-agent-patterns</a></dt>
+            <dd>Six LangGraph orchestration patterns with mandatory fact-checking, plus the daily automation agents I run on top of them.</dd>
+          </div>
+          <div>
+            <dt><a href="https://github.com/yashb98/Prism">Prism</a></dt>
+            <dd>A research agent that uses recursive language models to break million-token corpora into reasoning chains you can check.</dd>
+          </div>
+          <div>
+            <dt><a href="https://github.com/yashb98/LetsFineTune">LetsFineTune</a></dt>
+            <dd>Fine-tuned models built with LoRA, Unsloth and Transformers, with the configs, training scripts and evaluation results.</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="band" id="background">
+      <div class="margin"><h2>Background</h2></div>
+      <div class="main">
+        <ol class="timeline">
+          <li><span class="when">Jul 2026 to now</span><p><a href="contributions.html">Open source contributor</a> across PyTorch, Helion, bitsandbytes, HAMi and others</p></li>
+          <li><span class="when">Oct 2025 to now</span><p>Independent ML research, alongside work as a Team Leader at Co-op with a team of 8+</p></li>
+          <li><span class="when">2025 to 2026</span><p>MSc Computer Science, University of Dundee. <a href="https://github.com/yashb98/Deep-Learning-for-Facial-3D-Reconstruction---Simulator">Dissertation on deep learning for facial 3D reconstruction</a></p></li>
+          <li><span class="when">2021 to 2024</span><p>Market Research Analyst at Nidhi Herbal, automating SQL and Python reporting</p></li>
+          <li><span class="when">2019 to 2021</span><p>MBA, JECRC University</p></li>
+          <li><span class="when">2015 to 2019</span><p>BSc Biotechnology, Amity University Jaipur</p></li>
+        </ol>
+        <p class="more">In August 2026 I placed 18th of 785 in the RSNA knee abnormality competition on Kaggle, with a macro ROC AUC of 0.903.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="band">
+    <div class="margin"><h2>Get in touch</h2></div>
+    <div class="main">
+      <p class="closing">If you're hiring for LLM training, kernels or inference, let's talk.</p>
+      <ul class="actions">
+        <li><a class="primary" href="mailto:bishnoiyash274@gmail.com">Email me</a></li>
+        <li><a href="call.html">Book a call</a></li>
+        <li><a href="assets/Yash_Bishnoi_CV.pdf">Download my CV</a></li>
+        <li><a href="https://www.linkedin.com/in/yash-bishnoi/">Message me on LinkedIn</a></li>
+      </ul>
+    </div>
+  </footer>
+</body>
+</html>

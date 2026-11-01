@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>What the Gates Caught, Yash Bishnoi</title>
+  <meta name="description" content="Seven ways my own study tried to fool me (a token-soup data loader, an eval-token confound, a misread smoke log, a conflated data ratio) and how each one was caught or disclosed before it became a claim.">
+  <meta property="og:title" content="What the Gates Caught">
+  <meta property="og:description" content="Seven ways my own study tried to fool me (a token-soup data loader, an eval-token confound, a misread smoke log, a conflated data ratio) and how each one was caught or disclosed before it became a claim.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://yashb98.github.io/writing/what-the-gates-caught.html">
+  <link rel="canonical" href="https://yashb98.github.io/writing/what-the-gates-caught.html">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Hepta+Slab:wght@450;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header class="band hero">
+    <div class="margin">
+      <p class="who"><a href="../index.html">Yash Bishnoi</a></p>
+      <p class="where"><time datetime="2026-07-07">7 July 2026</time></p>
+    </div>
+    <div class="main">
+      <h1>What the Gates Caught</h1>
+    </div>
+  </header>
+  <main>
+    <section class="band">
+      <div class="margin"><p><a href="../index.html#writing">All writing</a></p></div>
+      <div class="main article">
+<p>Every controlled result in my Qwen3-0.6B study passed through the same gates: a plausibility read of scored verdicts, a fixed held-out evaluation set required before any win call, iso-FLOP confound checks, and a claim-to-file audit that opens every cited artifact. The paper's Section 11 is a catalogue of what those gates caught <em>in my own work</em>, and it is the section I most want people to read. Positive results are easy to like. A protocol that demonstrably catches its author's own errors is the strongest warrant I can offer for the claims that survived it.</p>
+<p>Here is the catalogue: symptom, detection, root cause, fix.</p>
+<h2>The catalogue</h2>
+<h3>1. The token-soup data mix</h3>
+<p>In the first data-mix run, the 50/50 dclm-edu/FineWeb-Edu blend scored roughly 2x <em>worse</em> than both pure parents: wikitext-2 BPB 2.77 against roughly 1.52, as recorded in the fix commit. That is physically implausible for a blend, whose loss should sit near the convex hull of its parents, and I caught it because a blend cannot score worse than both parents, before any conclusion was recorded. Root cause: a numpy shuffle applied at the <em>token</em> level had interleaved the two sources token by token, destroying all sequence structure. The fix (commit a576baa) concatenates the two coherent halves and mixes at the packed-sequence level, shuffling whole 4096-token windows. A 30-step probe after the fix shows training cross-entropy descending from 11.65 to 8.04, where the token-soup variant had stayed flat near 11. The broken cohort was discarded and rerun; the loader now carries an in-code warning.</p>
+<h3>2. The SFT eval-token confound</h3>
+<p>In-loop advisory scoring showed response-masked SFT beating its iso-FLOP control by 0.68 perplexity, nominally significant. The protocol forbids a win call from in-loop numbers, and re-scoring on one fixed held-out response-masked set collapsed the gap to +0.009 perplexity (95% CI [+0.0045, +0.0139], 3 seeds, paired), with a full-sequence cross-check giving -0.006 (95% CI [-0.011, -0.001]) in the control's favor, so it fails the one-sided improvement test. The arms had been scored on different token populations: response tokens versus all tokens. Verdict of record: directional. I wrote up the full anatomy in <a href="the-win-that-was-not.html">The Win That Was Not</a>; the standing guard is that in-loop perplexities are permanently labeled advisory.</p>
+<h3>3. The RFT smoke-log misread</h3>
+<p>An earlier draft of the RLVR verdict stated that the rejection-fine-tuning control collected <em>zero</em> verifier-correct completions. The claim-to-file audit for the paper re-read the full training log rather than its opening lines and found the "0 collected" line belongs to a one-step smoke test of 2026-07-02 at the top of the same log. The real 300-step run collected 352 of 38,400 rollouts, about 0.9%, matching the flat ~0.9% GRPO training reward. The verdict file and the repository README were corrected on 2026-07-06, with the correction note embedded in the regenerated artifact. The null verdict is unchanged (352 completions were far too few to separate RFT from the floor), but "zero" was wrong, and now smoke-test output is read as a distinct log segment.</p>
+<p>This entry pairs with the study's cleanest pre-registered result: the GRPO null itself. Before the run, the decision rule was fixed: GRPO had to beat both the SFT floor and a random-reward control on non-overlapping confidence intervals, or Phase 3 would not proceed. The verifier-correct reward stayed flat at ~0.9% for all 300 steps (first-50 mean 0.0091, last-50 0.0080) while the random-reward gate arm hovered at ~0.5 by construction. GRPO beat neither gate on either eval set, and the pre-registered decision fired: no Phase 3. Single seed, capped as directional by design: a null I trust precisely because the bar was set before I could see the result.</p>
+<p><a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/results/grpo_rewards.json">See the per-step rewards in the results file</a>.</p>
+<h3>4. The conflated data ratio</h3>
+<p>Repository documentation paired the 2.14x gap-to-original with "~275,000x less data." The claim-to-file audit caught it: the source file pairs 275,000x with the 131M-token Phase-A probe, whose gap is 3.5x. Numbers from two different runs had merged into one sentence. The correct pairings are 2.14x at ~30,000x less data (the 1.19B-token run) and 3.5x at ~275,000x less data (the 131M-token run); both are descriptive-tier, single-run, in-loop validation-perplexity ratios, corrected 2026-07-06. The two runs and their source files are in <a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/results/gap_to_original.json">the gap results file</a>.</p>
+<h3>5. The build that died at 30%</h3>
+<p>The exploratory partial-RoPE-0.10 build died at step 5,450 of 18,150 (about 30% of budget) with a last-eval in-loop validation perplexity of 50.71 (single run, not suite-stamped). This one is an honesty entry rather than a gate catch: the temptation with a crashed exploratory arm is to quietly drop it. It is reported as incomplete in the paper instead, because a results table that only contains finished runs is a survivorship filter.</p>
+<h3>6. The stale derived field</h3>
+<p>The ledger entry for the mid-training anneal carried a sub-field reading "directional" beside a verdict field reading "win." The audit cross-checked every ledger field against the run's verdict artifact and found the cap predated a same-night upgrade that completed the stage's required evaluation battery: the verdict fields were updated, the derived sub-field was not. The authoritative verdict file supports the win. The lesson stands as a standing hazard: derived fields duplicated across artifacts can go stale independently of the record they summarize.</p>
+<h3>7. The citation that pointed at the wrong file</h3>
+<p>The model README cited verify.json as evidence for the 596,049,920-parameter count, but that file contains no parameter field. The number itself is correct; it is recovered exactly by recomputation from the architecture configuration and asserted in the build's test suite. Only the citation was off. The claim-to-file audit caught it, and the resulting rule became this site's thesis: every number must trace to the file that actually contains it.</p>
+<h2>Why this is the argument</h2>
+<p>None of these was caught by re-reading prose, and I re-read the prose plenty. Item 5 is a disclosure rather than a catch. The other six came from an implausible scored verdict, a fixed held-out set required before any win call, or a claim-to-file audit that opens every cited artifact.</p>
+<p>That is the case for gates and pre-registration in one sentence: the author is the least trustworthy reviewer of a result they want. My in-loop SFT "win" had a beautiful confidence interval. The mix-run failure looked like a boring bad arm until the implausible score gave it away. The RFT "zero" read fine for days. What kept each of these out of the record was not vigilance but structure: checks specified in advance, applied identically to results I liked and results I didn't. The same gates validate the positive claims in the paper, which is exactly why the failure catalogue is published next to them.</p>
+      </div>
+    </section>
+  </main>
+  <footer class="band">
+    <div class="margin"><h2><a href="../index.html">Back to home</a></h2></div>
+    <div class="main">
+      <p class="closing">If you're hiring for LLM training, kernels or inference, <a href="mailto:bishnoiyash274@gmail.com">email me</a>.</p>
+    </div>
+  </footer>
+</body>
+</html>

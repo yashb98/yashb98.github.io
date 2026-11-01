@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contributions, Yash Bishnoi</title>
+  <meta name="description" content="Every open source contribution by Yash Bishnoi, what each one fixed, and how it turned out, including the pull requests that did not land.">
+  <meta property="og:title" content="Contributions, Yash Bishnoi">
+  <meta property="og:description" content="What each pull request fixed and how it turned out, including the ones that did not land.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yashb98.github.io/contributions.html">
+  <link rel="canonical" href="https://yashb98.github.io/contributions.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Hepta+Slab:wght@450;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#landed">Skip to landed work</a>
+
+  <header class="band hero">
+    <div class="margin">
+      <p class="who"><a href="index.html">Yash Bishnoi</a></p>
+      <p class="where">ML engineer, Glasgow</p>
+    </div>
+    <div class="main">
+      <h1>Everything I've sent upstream, including what didn't land.</h1>
+      <p class="lede page-lede">Most of this starts on my NVIDIA GB10, where newer hardware exposes assumptions that older GPUs never tested. I reproduce the failure, find the cause and send the fix. As of 1 November 2026 that's 23 pull requests: 7 landed, 7 in review and 9 that didn't land.</p>
+      <ul class="links">
+        <li><a href="#now">Accepted</a></li>
+        <li><a href="#landed">Landed</a></li>
+        <li><a href="#review">In review</a></li>
+        <li><a href="#closed">Didn't land</a></li>
+        <li><a href="#reports">Reports and triage</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <section class="band" id="now">
+      <div class="margin"><h2>Accepted, not yet public</h2></div>
+      <div class="main">
+        <ol class="contrib">
+          <li>
+            <div class="contrib-id">
+              <h3>ONNX MatMul documentation</h3>
+              <p>Accepted through the ONNX Slack</p>
+            </div>
+            <div class="contrib-body">
+              <p>The MatMul operator's description mostly pointed readers to NumPy, leaving them to work out the matrix, vector and batch-shape rules themselves. I rewrote it to state those rules directly, with a nine-row shape table and a worked numerical example, across the shared schema for versions 1, 9 and 13.</p>
+              <p>My patch also has 14 shape-inference checks for inputs the documentation says are invalid. The behaviour of the operator doesn't change.</p>
+              <p class="contrib-status">Accepted through the ONNX Slack. The public pull request hasn't been opened yet.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="band" id="landed">
+      <div class="margin"><h2>Landed</h2></div>
+      <div class="main">
+        <ol class="contrib">
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/pytorch/pytorch/commit/075742a095">PyTorch #196167</a></h3>
+              <p><time datetime="2026-09-17">17 Sep 2026</time></p>
+            </div>
+            <div class="contrib-body">
+              <p>Under <code>torch.compile</code>, an <code>OrderedSet</code> lost its insertion order at the compile boundary, because TorchDynamo modelled it as a plain <code>set</code>. I split <code>OrderedSetVariable</code> off <code>SetVariable</code> so it follows the real Python type.</p>
+            </div>
+          </li>
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/pytorch/pytorch/commit/59f3b80152">PyTorch #193580</a></h3>
+              <p><time datetime="2026-08-18">18 Aug 2026</time></p>
+            </div>
+            <div class="contrib-body">
+              <p>Calling <code>.add</code> on a <code>frozenset</code> under <code>torch.compile</code> raised an internal assertion. CPython raises <code>AttributeError</code>. Splitting <code>FrozensetVariable</code> off <code>SetVariable</code> makes compiled code fail the same way eager code does.</p>
+            </div>
+          </li>
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/pytorch/helion/pull/3415">PyTorch Helion #3415</a></h3>
+              <p><time datetime="2026-08-20">20 Aug 2026</time></p>
+            </div>
+            <div class="contrib-body">
+              <p>A <code>scaled_mm</code> config tuned for H100 needed 147,456 bytes of shared memory, and a GB10 has 101,376, so the test ran a config that could never launch. The test now skips on GPUs with under 147,456 bytes of shared memory, GB10 included, and sm121 has its own heuristic file, which I checked in a separate run with the guard bypassed.</p>
+            </div>
+          </li>
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/bitsandbytes-foundation/bitsandbytes/pull/2030">bitsandbytes #2030</a></h3>
+              <p><time datetime="2026-08-13">13 Aug 2026</time></p>
+            </div>
+            <div class="contrib-body">
+              <p>Added an sm121 tier to the 4-bit GEMM dispatch heuristic, chosen from measured timings. To show nothing else moved, I enumerated all 60,720 dispatch decisions in the test grid: 216 changed, and every one was on sm121.</p>
+            </div>
+          </li>
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/bitsandbytes-foundation/bitsandbytes/pull/2039">bitsandbytes #2039</a></h3>
+              <p><time datetime="2026-08-18">18 Aug 2026</time></p>
+            </div>
+            <div class="contrib-body">
+              <p>Extended the same work to the <code>wide_n_simt</code> dispatch rule, so GB10 gets the wide kernel path too.</p>
+            </div>
+          </li>
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/Project-HAMi/website/pull/865">HAMi website #865</a></h3>
+              <p><time datetime="2026-09-19">19 Sep 2026</time></p>
+            </div>
+            <div class="contrib-body">
+              <p>Cut the v2.10.0 documentation for HAMi, the CNCF GPU virtualisation project, in English and Chinese. I also corrected the memory units, resource formats, and the device registration and health-check explanations against the v2.10.0 release.</p>
+            </div>
+          </li>
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/linkedin/Liger-Kernel/pull/1332">Liger-Kernel #1332</a></h3>
+              <p><time datetime="2026-09-28">28 Sep 2026</time></p>
+            </div>
+            <div class="contrib-body">
+              <p>A one-line fix. <code>pyproject.toml</code> had no <code>requires-python</code>, so pip would install the package on interpreters it doesn't support.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="band" id="review">
+      <div class="margin"><h2>In review</h2></div>
+      <div class="main">
+        <ol class="contrib">
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/pytorch/helion/pull/4097">PyTorch Helion #4097</a></h3>
+              <p>Opened 20 Oct 2026</p>
+            </div>
+            <div class="contrib-body">
+              <p>On a GPU with no heuristic file of its own, configs from an older GPU can exceed its limits. On GB10 with only the sm90 file, 19 of 24 decode shapes failed at first launch. This fits a config to the GPU when it first runs.</p>
+            </div>
+          </li>
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/pytorch/helion/pull/4045">PyTorch Helion #4045</a></h3>
+              <p>Opened 16 Oct 2026</p>
+            </div>
+            <div class="contrib-body">
+              <p>The autotuner silently dropped seed configs with short per-loop lists. On GB10 that was all 97 <code>scaled_mm</code> configs, and the log gave no reason. This fills the short lists.</p>
+            </div>
+          </li>
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/huggingface/trl/pull/7085">TRL #7085</a></h3>
+              <p>Opened 6 Sep 2026</p>
+            </div>
+            <div class="contrib-body">
+              <p>Fixes FP8 weight synchronisation for colocated vLLM, so vLLM rebuilds its FP8 weights and scales from the current training weights on each sync.</p>
+            </div>
+          </li>
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/browser-use/browser-use/pull/5701">browser-use #5701</a></h3>
+              <p>Opened 6 Sep 2026</p>
+            </div>
+            <div class="contrib-body">
+              <p>A model call finishing during a pricing lookup could make a usage summary disagree with itself. The summary now works from one snapshot of the call history.</p>
+            </div>
+          </li>
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/vllm-project/compressed-tensors/pull/844">compressed-tensors #844</a></h3>
+              <p>Opened 19 Aug 2026</p>
+            </div>
+            <div class="contrib-body">
+              <p>Models whose layers have different attention shapes crashed during attention or KV-cache quantisation. Shapes are now read from each layer's own config.</p>
+            </div>
+          </li>
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/triton-lang/triton/pull/11363">Triton #11363</a></h3>
+              <p>Opened 18 Aug 2026</p>
+            </div>
+            <div class="contrib-body">
+              <p>Consumer Blackwell has no <code>tile::scatter4</code>, so <code>desc.scatter()</code> failed deep in <code>ptxas</code> as an internal error. It's now rejected at compile time with a message that names the hardware limit.</p>
+            </div>
+          </li>
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/linkedin/Liger-Kernel/pull/1328">Liger-Kernel #1328</a></h3>
+              <p>Opened 31 Jul 2026</p>
+            </div>
+            <div class="contrib-body">
+              <p>The fused cross-entropy backward failed under <code>torch.compile</code> on an overload TorchInductor can't lower. The fast path now steps aside while compiling, and eager mode is unchanged.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="band" id="closed">
+      <div class="margin"><h2>Didn't land</h2></div>
+      <div class="main">
+        <ol class="contrib">
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/pytorch/helion/pull/3896">PyTorch Helion #3896</a></h3>
+              <p>Fix landed another way</p>
+            </div>
+            <div class="contrib-body">
+              <p>Output stores were split along the wrong dimension in <code>epilogue_subtile</code>. I closed this after <a href="https://github.com/pytorch/helion/pull/3963">#3963</a> landed, which built on it, included the fix and credits me as co-author.</p>
+            </div>
+          </li>
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/jax-ml/jax/pull/40644">JAX #40644</a></h3>
+              <p>Fix landed another way</p>
+            </div>
+            <div class="contrib-body">
+              <p>Changing <code>jax_high_dynamic_range_gumbel</code> between calls reused a stale compiled function. The same one-line fix landed in JAX as <a href="https://github.com/jax-ml/jax/pull/41577">#41577</a>, so my PR is no longer needed.</p>
+            </div>
+          </li>
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/pytorch/ao/pull/4869">torchao #4869</a></h3>
+              <p>Fix landed another way</p>
+            </div>
+            <div class="contrib-body">
+              <p>A second <code>quantize_()</code> call with a weight-only config sent quantised tensors through unsupported ops. A different fix landed as <a href="https://github.com/pytorch/ao/pull/4873">#4873</a>, which skips weights that are already quantised.</p>
+            </div>
+          </li>
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/huggingface/trl/pull/6579">TRL #6579</a></h3>
+              <p>Declined</p>
+            </div>
+            <div class="contrib-body">
+              <p>Implemented UP, an asymmetric GRPO objective, from <a href="https://github.com/huggingface/trl/issues/6407">my own proposal</a>. My own runs showed the paper's recipe collapsing at 0.6B and 4B without a KL term, and I posted them. The maintainers passed on the method for now.</p>
+            </div>
+          </li>
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/huggingface/trl/pull/6590">TRL #6590</a></h3>
+              <p>Closed by the maintainer</p>
+            </div>
+            <div class="contrib-body">
+              <p>Removed a warning filter once bitsandbytes shipped its fix. The PR did what the issue said, but the minimum supported version hadn't moved, so the filter still had to stay.</p>
+            </div>
+          </li>
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/huggingface/trl/pull/7329">TRL #7329</a> and <a href="https://github.com/huggingface/trl/pull/7312">#7312</a></h3>
+              <p>Superseded</p>
+            </div>
+            <div class="contrib-body">
+              <p>Removed the experimental MiniLLM trainer. #7312 was closed under TRL's policy on AI-generated PRs from first-time contributors, and #7329 was superseded by #7500.</p>
+            </div>
+          </li>
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/huggingface/transformers/pull/48123">Transformers #48123</a></h3>
+              <p>Closed by a maintainer, labelled as AI-generated</p>
+            </div>
+            <div class="contrib-body">
+              <p>Pack-quantised embeddings have no dense <code>.weight</code>, so <code>_init_weights</code> crashed while loading some NVFP4 checkpoints. The PR guarded that branch.</p>
+            </div>
+          </li>
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/PrimeIntellect-ai/prime-rl/pull/3416">prime-rl #3416</a></h3>
+              <p>Closed as stale</p>
+            </div>
+            <div class="contrib-body">
+              <p>Added the missing hardware check for FP8 blockwise quantisation, so unsupported GPUs fail early with a clear message.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="band" id="reports">
+      <div class="margin"><h2>Reports and triage</h2></div>
+      <div class="main">
+        <p class="lede">A GB10 on my desk lets me test bugs on hardware many maintainers don't have.</p>
+        <dl class="builds reports">
+          <div>
+            <dt><a href="https://github.com/Project-HAMi/HAMi/issues/3156">HAMi #3156</a></dt>
+            <dd>A validation of HAMi v2.10.0 on real GB10 hardware, with raw logs. cudaMalloc memory limits work; compute throttling switched itself off through a default-policy feedback deadlock and, once engaged, did not hold a pod near its share.</dd>
+          </div>
+          <div>
+            <dt><a href="https://github.com/vllm-project/vllm/issues/50773">vLLM #50773</a></dt>
+            <dd>Investigated garbled output from custom quantisation fusions on GB10, finding a real defect that does not explain the report. The cause is still open.</dd>
+          </div>
+          <div>
+            <dt><a href="https://github.com/flashinfer-ai/flashinfer/pull/4331">FlashInfer #4331</a></dt>
+            <dd>Ran the numerical suite on GB10 when the PR's author asked for sm12x results, then followed up on the kernel-cache gap in <a href="https://github.com/flashinfer-ai/flashinfer/issues/4317">#4317</a>.</dd>
+          </div>
+          <div>
+            <dt><a href="https://github.com/triton-lang/triton/issues/11344">Triton #11344</a></dt>
+            <dd>Reported the scatter failure on consumer Blackwell that led to Triton #11363.</dd>
+          </div>
+          <div>
+            <dt><a href="https://github.com/pytorch/helion/issues/3772">Helion #3772</a></dt>
+            <dd>Offered to extend the sm121 heuristic to the full vLLM decode grid, which led to the autotuner work above.</dd>
+          </div>
+          <div>
+            <dt><a href="https://github.com/vllm-project/compressed-tensors/issues/847">compressed-tensors #847</a></dt>
+            <dd>Reported that overlapping regex targets sort alphabetically rather than by specificity, so a broad pattern can beat an explicit layer list.</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+  </main>
+
+  <footer class="band">
+    <div class="margin"><h2><a href="index.html">Back to home</a></h2></div>
+    <div class="main">
+      <p class="closing">If you have a GB10 bug that needs a reproduction, <a href="mailto:bishnoiyash274@gmail.com">email me</a>.</p>
+    </div>
+  </footer>
+</body>
+</html>

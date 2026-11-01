@@ -1,0 +1,240 @@
+{
+  "commit": "fe18745556e4877a0d2e804e15e423999fd40bb2",
+  "repo": "yashb98/BuildFromScratch",
+  "domain": [
+    -0.1,
+    0.8
+  ],
+  "ticks": [
+    0,
+    0.2,
+    0.4,
+    0.6,
+    0.8
+  ],
+  "rows": [
+    {
+      "name": "Swap the training data to dclm-edu",
+      "budget": "131M tokens",
+      "english": {
+        "value": -0.0097280316070818,
+        "ci": [
+          -0.025549693563240664,
+          0.006093630349077065
+        ],
+        "seeds": [
+          -0.0058,
+          -0.016,
+          -0.0073
+        ]
+      },
+      "code": {
+        "value": 0.7034377813053776,
+        "ci": [
+          0.6639233630446848,
+          0.7429521995660704
+        ],
+        "seeds": [
+          0.7125,
+          0.6985,
+          0.6994
+        ]
+      },
+      "note": "The largest effect in the study came from changing the data alone. Code gained 0.70 bits per byte and English did not move.",
+      "source": "Qwen3-0.6B/experiments/2026-06-24_qwen3-0.6b_data-dclm-vs-fineweb/verdict.json"
+    },
+    {
+      "name": "Blend the data 50/50",
+      "budget": "131M tokens",
+      "english": {
+        "value": 0.016087033990631383,
+        "ci": [
+          -0.0005010071851609399,
+          0.032675075166423706
+        ],
+        "seeds": [
+          0.0173,
+          0.0038,
+          0.0272
+        ]
+      },
+      "code": {
+        "value": 0.5904307914737172,
+        "ci": [
+          0.5531974784151051,
+          0.6276641045323293
+        ],
+        "seeds": [
+          0.5897,
+          0.5734,
+          0.6082
+        ]
+      },
+      "note": "The blend kept about 84% of the code gain and held English steady, so this mix went forward into mid-training.",
+      "source": "Qwen3-0.6B/experiments/2026-06-26_qwen3-0.6b_data-mix-composition/verdict.json"
+    },
+    {
+      "name": "Replace AdamW with NorMuon",
+      "budget": "42M tokens, early training only",
+      "english": {
+        "value": 0.47432550192416323,
+        "ci": [
+          0.4434844613250229,
+          0.5051665425233036
+        ],
+        "seeds": [
+          0.4551,
+          0.4776,
+          0.4903
+        ]
+      },
+      "code": {
+        "value": 0.5015586517902451,
+        "ci": [
+          0.4559911731303807,
+          0.5471261304501094
+        ],
+        "seeds": [
+          0.5156,
+          0.462,
+          0.5271
+        ]
+      },
+      "note": "This edge fades with budget. Across the token ladder the English gap falls from 0.474 to 0.072, and at the top rung the fitted edge sits inside the noise floor. Code keeps a resolved edge.",
+      "source": "Qwen3-0.6B/experiments/2026-06-16_qwen3_normuon-vs-adamw/results/verdict.json",
+      "links": [
+        {
+          "label": "Budget ladder",
+          "path": "README.md",
+          "commit": "a8ff1247471f6ddb2e85910561d2da632342fda8"
+        }
+      ]
+    },
+    {
+      "name": "Add three architecture modules",
+      "budget": "131M tokens",
+      "english": {
+        "value": 0.11792615800601025,
+        "ci": [
+          0.10045055390862463,
+          0.13540176210339586
+        ],
+        "seeds": [
+          0.1233,
+          0.107,
+          0.1234
+        ]
+      },
+      "code": {
+        "value": 0.3049240450045283,
+        "ci": [
+          0.2587722809820044,
+          0.3510758090270522
+        ],
+        "seeds": [
+          0.2951,
+          0.3133,
+          0.3063
+        ]
+      },
+      "note": "Value residual, layernorm scaling and head gating. Each one is significant on its own when tested separately.",
+      "source": "Qwen3-0.6B/experiments/2026-06-18_qwen3-0.6b_imu1-deconfound-p1/verdict.json",
+      "links": [
+        {
+          "label": "Per-module results",
+          "path": "Qwen3-0.6B/results/arch_subdrill.json"
+        }
+      ]
+    },
+    {
+      "name": "Anneal on the 50/50 mix",
+      "budget": "150M tokens",
+      "english": {
+        "value": 0.01573805476049084,
+        "ci": [
+          0.014040993622104418,
+          0.01743511589887726
+        ],
+        "seeds": [
+          0.0163,
+          0.0148,
+          0.0161
+        ]
+      },
+      "code": {
+        "value": 0.27160749360360237,
+        "ci": [
+          0.2640563484201071,
+          0.2791586387870976
+        ],
+        "seeds": [
+          0.2716,
+          0.269,
+          0.2742
+        ]
+      },
+      "note": "The control took the same learning-rate cooldown on FineWeb-Edu alone, so the data carries this gain and the schedule does not. I expected no change on English; it moved slightly.",
+      "source": "Qwen3-0.6B/experiments/2026-06-30_qwen3-0.6b_midtrain-anneal/verdict.json"
+    },
+    {
+      "name": "Use a warmup-stable-decay schedule",
+      "budget": "131M tokens",
+      "english": {
+        "value": 0.02445100663943567,
+        "ci": [
+          -0.017262911764197773,
+          0.06616492504306912
+        ],
+        "seeds": [
+          0.0107,
+          0.0302,
+          0.0324
+        ]
+      },
+      "code": {
+        "value": 0.03613565282082609,
+        "ci": [
+          -0.06492886457337839,
+          0.13720017021503056
+        ],
+        "seeds": [
+          -0.0026,
+          0.0568,
+          0.0543
+        ]
+      },
+      "note": "The interval crosses zero on both corpora, so the study claims nothing for this schedule.",
+      "source": "Qwen3-0.6B/experiments/2026-06-18_qwen3-0.6b_imu1-deconfound-p1/verdict.json"
+    },
+    {
+      "name": "Add z-loss",
+      "budget": "131M tokens",
+      "english": {
+        "value": -0.003374986704193006,
+        "ci": [
+          -0.017536542115922118,
+          0.010786568707536106
+        ],
+        "seeds": [
+          -0.0046,
+          -0.0063,
+          0.0007
+        ]
+      },
+      "code": {
+        "value": -0.0007094693010314401,
+        "ci": [
+          -0.052240000161460506,
+          0.050821061559397626
+        ],
+        "seeds": [
+          -0.0191,
+          0.0109,
+          0.0061
+        ]
+      },
+      "note": "No measurable effect on either corpus.",
+      "source": "Qwen3-0.6B/experiments/2026-06-18_qwen3-0.6b_imu1-deconfound-p1/verdict.json"
+    }
+  ]
+}

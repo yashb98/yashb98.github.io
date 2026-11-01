@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Book a call, Yash Bishnoi</title>
+  <meta name="description" content="Suggest a time to talk with Yash Bishnoi about ML engineering roles.">
+  <link rel="canonical" href="https://yashb98.github.io/call.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Hepta+Slab:wght@450;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <header class="band hero">
+    <div class="margin">
+      <p class="who"><a href="index.html">Yash Bishnoi</a></p>
+      <p class="where">ML engineer, Glasgow</p>
+    </div>
+    <div class="main">
+      <h1>Book a call</h1>
+      <p class="lede page-lede">Suggest a few times and this opens an email to me with the details filled in. I'll reply to confirm and send a meeting link.</p>
+    </div>
+  </header>
+  <main>
+    <section class="band">
+      <div class="margin"><h2>Your details</h2></div>
+      <div class="main">
+        <form class="call-form" id="call-form" action="mailto:bishnoiyash274@gmail.com" method="post" enctype="text/plain">
+          <label>Your name
+            <input type="text" name="name" autocomplete="name" required>
+          </label>
+          <label>Company (optional)
+            <input type="text" name="company" autocomplete="organization">
+          </label>
+          <label>What would you like to talk about?
+            <textarea name="topic" rows="3" required></textarea>
+          </label>
+          <label>Times that suit you, with your time zone
+            <textarea name="times" rows="3" required placeholder="Tuesday 10:00 UK time, Wednesday 15:00 UK time"></textarea>
+          </label>
+          <button type="submit">Open the email</button>
+        </form>
+        <p class="more">Prefer to write it yourself? Email me at <a href="mailto:bishnoiyash274@gmail.com">bishnoiyash274@gmail.com</a>.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

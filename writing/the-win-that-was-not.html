@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Win That Was Not, Yash Bishnoi</title>
+  <meta name="description" content="My SFT ablation produced a +0.68-perplexity win with a confidence interval tight enough to look unimpeachable. It was an artifact of scoring the two arms on different token sets, and it collapsed to +0.009 on a fixed held-out set.">
+  <meta property="og:title" content="The Win That Was Not">
+  <meta property="og:description" content="My SFT ablation produced a +0.68-perplexity win with a confidence interval tight enough to look unimpeachable. It was an artifact of scoring the two arms on different token sets, and it collapsed to +0.009 on a fixed held-out set.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://yashb98.github.io/writing/the-win-that-was-not.html">
+  <link rel="canonical" href="https://yashb98.github.io/writing/the-win-that-was-not.html">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Hepta+Slab:wght@450;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header class="band hero">
+    <div class="margin">
+      <p class="who"><a href="../index.html">Yash Bishnoi</a></p>
+      <p class="where"><time datetime="2026-07-07">7 July 2026</time></p>
+    </div>
+    <div class="main">
+      <h1>The Win That Was Not</h1>
+    </div>
+  </header>
+  <main>
+    <section class="band">
+      <div class="margin"><p><a href="../index.html#writing">All writing</a></p></div>
+      <div class="main article">
+<p>The most instructive result in my Qwen3-0.6B study is a win that evaporated. The supervised fine-tuning stage handed me an apparently decisive +0.68-perplexity improvement, complete with a three-seed confidence interval so tight it looked unimpeachable. It was an artifact. Under a corrected protocol the gap shrank to roughly a hundredth of a perplexity point, and a cross-check flipped its sign. This post is the anatomy of that collapse, because the failure mode is general and I suspect it is common.</p>
+<h2>The question</h2>
+<p>The SFT stage poses a single-variable question: does response masking (computing the loss only on response tokens, the standard practice in instruction tuning) actually improve a small reasoning-SFT recipe over plain continued pre-training on the same data?</p>
+<p>Both arms start from the same faithful 1.19B-token base checkpoint and take one pass over the same prepared OpenR1-Math reasoning corpus of 125,000,592 tokens: peak learning rate 5e-5 with cosine decay to 8e-8, 5% warmup, global batch 128, AdamW, three seeds per arm. The treatment applies a response mask; the control is an iso-FLOP no-mask continued-pretrain arm that is identical in data, ordering, schedule, steps, and token budget. The loss mask is the only variable. And because prompts are a small fraction of this corpus, the masked arm takes loss on 97.6% of tokens versus the control's 100%: the treatment effect being tested is the exclusion of a thin 2.4% prompt-token slice from the objective.</p>
+<h2>The decisive win, apparently</h2>
+<p>The in-loop evaluation (training-loop perplexity, not suite-stamped) showed SFT at 11.595 versus the control at 12.273. That is a +0.679 gap with a 95% CI of [+0.676, +0.681] across three seeds per arm. If I had stopped there, the write-up would have been easy: response masking works, the interval excludes zero by a mile, ship it.</p>
+<p>But the comparison is confounded. Each arm reused its own training mask at evaluation time, so the SFT arm was scored on response tokens only while the control was scored on all tokens. Perplexities computed over different token sets are not comparable numbers; they are averages over different distributions. The in-loop verdict flagged this itself and capped the result to directional, advisory-only, pending re-scoring under a shared protocol. That cap is not a courtesy; in my evidence gates, no win call may rest on in-loop numbers at all.</p>
+<h2>The corrected protocol</h2>
+<p>The verdict of record re-scores all seven checkpoints (base plus three seeds per arm) on one fixed held-out response-masked reasoning set: 66 held-out OpenR1-Math documents comprising 228,529 response tokens, produced by a seeded document-level split with 13-gram deduplication against the training set.</p>
+<p>On this common footing, base perplexity 14.127 falls to 11.573 for SFT and 11.582 for the control, improvements of 18.1% and 18.0% respectively. The 0.68-perplexity gap collapses to +0.009 PPL, 95% CI [+0.0045, +0.0139]. Nominally significant, but a small fraction of the advisory number.</p>
+<p><a href="https://github.com/yashb98/BuildFromScratch/blob/fe18745556e4877a0d2e804e15e423999fd40bb2/Qwen3-0.6B/results/sft_null.json">See the three comparisons in the results file</a>.</p>
+<p>Then the cross-check. A tokenizer-free full-sequence scoring pass over the same documents flips the sign: -0.006 PPL, 95% CI [-0.011, -0.001], with the <em>control</em> ahead, scored not significant under the pre-specified one-sided improvement test. The masked and full-sequence comparisons disagree, so the recorded verdict is <strong>directional</strong>: the two arms are not yet separable.</p>
+<p>Could this just be seed noise? No, and that is the uncomfortable part. Across-seed spread on the held-out set is 0.001 PPL within the SFT arm and 0.004 PPL within the control arm. The measurement is stable; the effect itself sits at the scale of the measurement.</p>
+<h2>Did either arm forget anything?</h2>
+<p>A reasonable worry with a 125M-token reasoning pass is damage to the base distribution. Neither arm shows it. On a held-out FineWeb-Edu probe, base perplexity 21.495 rises to 21.652 (SFT) and 21.660 (control), a +0.7% shift. On the standard suite, wikitext-2 moves from 37.010 to 37.082/37.084 against a noise floor of 1.304, and the code corpus from 438.673 to 425.689/425.594 against a floor of 280.564; both are labeled retained, not significant. One honesty note: the three-seed confidence intervals apply to the in-domain reasoning set only; the standard-suite retention numbers are single-seed spot checks.</p>
+<h2>What actually happened</h2>
+<p>The real effect at this scale is the <strong>data</strong>, not the masking. Continued training on in-domain mathematical reasoning delivers essentially the entire 18% perplexity gain. Excluding the 2.4% prompt-token slice from the loss adds at most a hundredth of a perplexity point of separation, of ambiguous sign. The headline that response-masked SFT beats continued pre-training does not survive an honest iso-FLOP control.</p>
+<p>The methodological point generalizes well beyond my run. A comparison whose arms are scored on different token sets can manufacture an apparent effect nearly two orders of magnitude larger than the corrected estimate, while presenting a confidence interval tight enough to look unimpeachable. Tight error bars certify precision, not validity. A CI is a statement about variance under repetition of the same procedure; if the procedure itself compares apples to oranges, the interval just tells you how reliably you are wrong.</p>
+<p>Two design choices saved this result from becoming a false claim. First, in-loop numbers are treated as advisory by construction: the protocol forbids a win call until a fixed held-out set has been scored. Second, the held-out set is defined once and shared across all arms, so no arm can smuggle its own evaluation conditions into the comparison. Neither check required cleverness in the moment. Both were mechanical, decided before the run, at a point where I had no stake in the answer.</p>
+<p>I keep the +0.68 number in the paper anyway, right next to the +0.009 it collapsed into. If I only published the corrected value, the record would show a careful null and hide the trap. The trap is the finding.</p>
+      </div>
+    </section>
+  </main>
+  <footer class="band">
+    <div class="margin"><h2><a href="../index.html">Back to home</a></h2></div>
+    <div class="main">
+      <p class="closing">If you're hiring for LLM training, kernels or inference, <a href="mailto:bishnoiyash274@gmail.com">email me</a>.</p>
+    </div>
+  </footer>
+</body>
+</html>

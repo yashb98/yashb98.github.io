@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Killing the 10 GB Tensor, Yash Bishnoi</title>
+  <meta name="description" content="My 596M-parameter model&#x27;s single biggest training tensor was a 9.96 GB fp32 logit matrix that exists only to be reduced to one scalar. On a free Kaggle T4, fused cross-entropy deletes it: the naive path OOMs past 4,096 tokens while Liger holds flat at ~3.2 GB out to 32,768, agreeing with the fp32 reference to ~1e-6 on the loss and ~2e-7 on the gradients.">
+  <meta property="og:title" content="Killing the 10 GB Tensor">
+  <meta property="og:description" content="My 596M-parameter model&#x27;s single biggest training tensor was a 9.96 GB fp32 logit matrix that exists only to be reduced to one scalar. On a free Kaggle T4, fused cross-entropy deletes it: the naive path OOMs past 4,096 tokens while Liger holds flat at ~3.2 GB out to 32,768, agreeing with the fp32 reference to ~1e-6 on the loss and ~2e-7 on the gradients.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://yashb98.github.io/writing/killing-the-10-gb-tensor.html">
+  <link rel="canonical" href="https://yashb98.github.io/writing/killing-the-10-gb-tensor.html">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;1,400&family=Hepta+Slab:wght@450;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header class="band hero">
+    <div class="margin">
+      <p class="who"><a href="../index.html">Yash Bishnoi</a></p>
+      <p class="where"><time datetime="2026-07-08">8 July 2026</time></p>
+    </div>
+    <div class="main">
+      <h1>Killing the 10 GB Tensor</h1>
+    </div>
+  </header>
+  <main>
+    <section class="band">
+      <div class="margin"><p><a href="../index.html#writing">All writing</a></p></div>
+      <div class="main article">
+<p>The largest tensor in my Qwen3-0.6B training run is not a weight, not an activation checkpoint, not an optimizer state. It is the cross-entropy logit matrix, and it exists for roughly one kernel launch, purely to be reduced to a single scalar loss. This post is about measuring exactly how expensive that tensor is, deleting it, and proving the deletion changes nothing about training. The benchmark runs end to end on a free Kaggle T4, which is rather the point.</p>
+<h2>The tensor that shouldn't exist</h2>
+<p>The final layer of a language model projects each token's hidden state to a logit over the vocabulary. For N tokens and vocabulary V, that is an N×V matrix, and the standard loss path upcasts it to fp32. My model is small (596M parameters, hidden dimension 1,024) but its tokenizer is Qwen3's, with <strong>V = 151,936</strong>. At my training micro-batch (4 × 4,096 = 16,384 tokens):</p>
+<pre><code>16,384 × 151,936 × 4 bytes = 9.96 GB
+</code></pre>
+<p>per micro-batch, before the backward pass wants its own copies. That single ephemeral matrix is larger than all of the model's weights combined. And the cost is N×V, completely independent of model size, which is why a <em>small</em> model with a large vocabulary pays the most disproportionate tax. The Cut-Cross-Entropy paper quantifies the direction on A100s: the loss head accounts for 40% of training memory on Phi-3.5-mini (32k vocab), 65% on Llama-3-8B (128k), and 89% on Gemma-2-2B (256k). Those numbers confound vocab with model size, so treat them as a direction, not a constant. But the direction is unambiguous.</p>
+<h2>How it killed an actual machine</h2>
+<p>This is not a hypothetical. On 2026-06-08, a throughput probe on my GB10 (micro-batch 16 × sequence 4,096, so 65,536 tokens) tried to materialize a <strong>~40 GB</strong> fp32 logit tensor. The GB10 has ~119 GB of <em>unified</em> CPU+GPU memory: there is no VRAM boundary to bounce off, so the allocation marched into the shared pool until the kernel OOM-killer shot the machine. Hard reboot, mid-run.</p>
+<p>Two guardrails came out of the autopsy, both still in the trainer today. First, a dependency-free <strong>chunked masked cross-entropy</strong>: iterate the flattened logits in 8,192-row chunks, compute the loss per chunk with sum-reduction, accumulate. The full (N, 151,936) fp32 matrix is never materialized. A correctness oracle asserts the chunked result matches the reference masked NLL to under 1e-4 before any GPU hours are spent. Second, a process-level allocator cap, so a future over-allocation raises a catchable <code>OutOfMemoryError</code> instead of rebooting the box. The rule is now codified in the repo: <em>chunk cross-entropy for any vocab over ~64k; never materialize (N, vocab) fp32 logits.</em></p>
+<h2>The benchmark: four ways to compute one scalar</h2>
+<p>The side project was to benchmark the loss-computation spectrum properly, on hardware anyone can reproduce: a free Kaggle T4 (16 GB, fp16), at exactly my training shape, V = 151,936, D = 1,024, N swept from 1,024 to 32,768. Four methods: <strong>naive</strong> (materialize the logits, my original trainer), <strong>torch.compile</strong> (fuses ops, still materializes the logits), <strong>Liger's fused cross-entropy</strong> (chunks the lm_head so the full matrix never exists), and <strong>CCE</strong> (never materializes any logit tile; more on why it's absent from the results below).</p>
+<p><strong>Correctness is a hard gate, run first.</strong> A faster loss that is subtly wrong doesn't crash. It silently corrupts every optimizer step and surfaces weeks later as an unexplained convergence gap. Against an fp32 unfused oracle, checking the scalar <em>and both gradients</em> that flow into training, Liger measured: |Δloss| ≈ 9.5×10⁻⁷, max |Δ| of 1.8×10⁻⁷ on the hidden-state gradient and 2.4×10⁻⁷ on the weight gradient. Effectively bit-exact. A convergence A/B (training an lm_head on fixed synthetic data with exact fp32 CE versus the fused kernel) produced indistinguishable loss curves, as the gradient agreement predicts.</p>
+<p><img alt="Convergence check: loss curves for exact fp32 cross-entropy and the fused kernel over 150 optimizer steps overlap exactly." src="convergence.png" /></p>
+<p><strong>The memory result, measured (peak GB, T4, fp16):</strong></p>
+<pre><code>N tokens         1,024   2,048   4,096   8,192   16,384   32,768
+naive             3.77    5.64    9.38     OOM      OOM      OOM
+torch.compile     2.53    2.84    3.48    4.74     7.26    12.30
+Liger (fused)     3.15    3.16    3.17    3.20     3.25     3.36
+</code></pre>
+<p>The naive path peaks at 9.38 GB at 4,096 tokens and is dead past it. torch.compile cuts real memory but still materializes the logits, so it climbs linearly toward the 16 GB wall. <strong>Liger is flat at ~3.2 GB across the entire sweep.</strong> At my actual micro-batch of 16,384 tokens the comparison reads naive = OOM, torch.compile = 7.26 GB, Liger = 3.25 GB, and it stays flat at double that length. Memory footprint is arithmetic, so unlike throughput this result transfers to any GPU: fused cross-entropy makes loss memory approximately independent of batch × sequence length. That flat line is the whole point. It removes the wall that forces small micro-batches.</p>
+<h2>The caveat that has to ride along</h2>
+<p>My T4 throughput numbers show Liger's kernels running far <em>slower</em> than naive: seconds against milliseconds. I am not publishing that as a verdict on the kernel, because it isn't one. Liger's Triton paths are tuned for Ampere and newer, and Turing-plus-fp16 is their documented worst case, so the absolute milliseconds are an artifact of the hardware. For speed, the published A100 hierarchy (Gemma-2-2B, 256k vocab, loss+grad) is: naive 207 ms, torch.compile 143 ms, Liger 303 ms, CCE 135 to 145 ms. On this run I claim exactly what I measured, <strong>the memory win and the OOM wall's removal, at ~10⁻⁶ agreement on the loss and ~2×10⁻⁷ on the gradients</strong>, not a speed win. (Also worth knowing: Liger's famous "20% throughput / 60% memory" headline describes their whole kernel suite in real training, never fused cross-entropy alone.)</p>
+<h2>What's next</h2>
+<p>CCE, the A100 state of the art, shrinks the logit term to roughly a megabyte. It installs and imports on Kaggle but cannot run there: its kernel requests 96 KB of shared memory per block against Turing's 64 KB cap. It needs Ampere or newer, which makes it the on-box GB10 follow-up, along with a kernel-level roofline for real throughput and a pretraining-scale, seeded A/B for CCE's 2⁻¹² gradient filter (its published no-regression evidence is fine-tuning-only). The workflow is the takeaway I care about: verify cheaply on a free GPU (correctness gate, transferable memory arithmetic, honest caveats) before spending on-box hours.</p>
+<hr />
+<p><em>The notebook runs end to end on a free Kaggle T4. Run it yourself: <a href="https://www.kaggle.com/code/yashbishnoi98/killing-the-10-gb-logit-tensor">the notebook on Kaggle</a>. The chunked-CE trainer code and the 2026-06-08 crash post-mortem live in <a href="https://github.com/yashb98/BuildFromScratch">BuildFromScratch</a>. References: Cut Cross-Entropy, <a href="https://arxiv.org/abs/2411.09009">arXiv 2411.09009</a> (ICLR 2025, <a href="https://github.com/apple/ml-cross-entropy">code</a>); Liger Kernel, <a href="https://arxiv.org/abs/2410.10989">arXiv 2410.10989</a> (<a href="https://github.com/linkedin/Liger-Kernel">code</a>).</em></p>
+      </div>
+    </section>
+  </main>
+  <footer class="band">
+    <div class="margin"><h2><a href="../index.html">Back to home</a></h2></div>
+    <div class="main">
+      <p class="closing">If you're hiring for LLM training, kernels or inference, <a href="mailto:bishnoiyash274@gmail.com">email me</a>.</p>
+    </div>
+  </footer>
+</body>
+</html>
