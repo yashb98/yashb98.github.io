@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Contributions, Yash Bishnoi</title>
-  <meta name="description" content="Every open source contribution by Yash Bishnoi, what each one fixed, and how it turned out, including the pull requests that did not land.">
+  <meta name="description" content="Open source contributions by Yash Bishnoi, including landed pull requests, work in review, and reports and triage.">
   <meta property="og:title" content="Contributions, Yash Bishnoi">
-  <meta property="og:description" content="What each pull request fixed and how it turned out, including the ones that did not land.">
+  <meta property="og:description" content="Landed pull requests, work in review, and reports and triage.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://yashb98.github.io/contributions.html">
   <link rel="canonical" href="https://yashb98.github.io/contributions.html">
@@ -25,13 +25,12 @@
       <p class="where">ML engineer, Glasgow</p>
     </div>
     <div class="main">
-      <h1>Everything I've sent upstream, including what didn't land.</h1>
-      <p class="lede page-lede">Most of this starts on my NVIDIA GB10, where newer hardware exposes assumptions that older GPUs never tested. I reproduce the failure, find the cause and send the fix. As of 1 November 2026 that's 23 pull requests: 7 landed, 7 in review and 9 that didn't land.</p>
+      <h1>My open source contributions.</h1>
+      <p class="lede page-lede">Most of this starts on my NVIDIA GB10, where newer hardware exposes assumptions that older GPUs never tested. I reproduce the failure, find the cause and send the fix. As of 1 November 2026, the pull requests featured here include 7 landed and 7 in review.</p>
       <ul class="links">
         <li><a href="#now">Accepted</a></li>
         <li><a href="#landed">Landed</a></li>
         <li><a href="#review">In review</a></li>
-        <li><a href="#closed">Didn't land</a></li>
         <li><a href="#reports">Reports and triage</a></li>
       </ul>
     </div>
@@ -193,86 +192,6 @@
             </div>
             <div class="contrib-body">
               <p>The fused cross-entropy backward failed under <code>torch.compile</code> on an overload TorchInductor can't lower. The fast path now steps aside while compiling, and eager mode is unchanged.</p>
-            </div>
-          </li>
-        </ol>
-      </div>
-    </section>
-
-    <section class="band" id="closed">
-      <div class="margin"><h2>Didn't land</h2></div>
-      <div class="main">
-        <ol class="contrib">
-          <li>
-            <div class="contrib-id">
-              <h3><a href="https://github.com/pytorch/helion/pull/3896">PyTorch Helion #3896</a></h3>
-              <p>Fix landed another way</p>
-            </div>
-            <div class="contrib-body">
-              <p>Output stores were split along the wrong dimension in <code>epilogue_subtile</code>. I closed this after <a href="https://github.com/pytorch/helion/pull/3963">#3963</a> landed, which built on it, included the fix and credits me as co-author.</p>
-            </div>
-          </li>
-          <li>
-            <div class="contrib-id">
-              <h3><a href="https://github.com/jax-ml/jax/pull/40644">JAX #40644</a></h3>
-              <p>Fix landed another way</p>
-            </div>
-            <div class="contrib-body">
-              <p>Changing <code>jax_high_dynamic_range_gumbel</code> between calls reused a stale compiled function. The same one-line fix landed in JAX as <a href="https://github.com/jax-ml/jax/pull/41577">#41577</a>, so my PR is no longer needed.</p>
-            </div>
-          </li>
-          <li>
-            <div class="contrib-id">
-              <h3><a href="https://github.com/pytorch/ao/pull/4869">torchao #4869</a></h3>
-              <p>Fix landed another way</p>
-            </div>
-            <div class="contrib-body">
-              <p>A second <code>quantize_()</code> call with a weight-only config sent quantised tensors through unsupported ops. A different fix landed as <a href="https://github.com/pytorch/ao/pull/4873">#4873</a>, which skips weights that are already quantised.</p>
-            </div>
-          </li>
-          <li>
-            <div class="contrib-id">
-              <h3><a href="https://github.com/huggingface/trl/pull/6579">TRL #6579</a></h3>
-              <p>Declined</p>
-            </div>
-            <div class="contrib-body">
-              <p>Implemented UP, an asymmetric GRPO objective, from <a href="https://github.com/huggingface/trl/issues/6407">my own proposal</a>. My own runs showed the paper's recipe collapsing at 0.6B and 4B without a KL term, and I posted them. The maintainers passed on the method for now.</p>
-            </div>
-          </li>
-          <li>
-            <div class="contrib-id">
-              <h3><a href="https://github.com/huggingface/trl/pull/6590">TRL #6590</a></h3>
-              <p>Closed by the maintainer</p>
-            </div>
-            <div class="contrib-body">
-              <p>Removed a warning filter once bitsandbytes shipped its fix. The PR did what the issue said, but the minimum supported version hadn't moved, so the filter still had to stay.</p>
-            </div>
-          </li>
-          <li>
-            <div class="contrib-id">
-              <h3><a href="https://github.com/huggingface/trl/pull/7329">TRL #7329</a> and <a href="https://github.com/huggingface/trl/pull/7312">#7312</a></h3>
-              <p>Superseded</p>
-            </div>
-            <div class="contrib-body">
-              <p>Removed the experimental MiniLLM trainer. #7312 was closed under TRL's policy on AI-generated PRs from first-time contributors, and #7329 was superseded by #7500.</p>
-            </div>
-          </li>
-          <li>
-            <div class="contrib-id">
-              <h3><a href="https://github.com/huggingface/transformers/pull/48123">Transformers #48123</a></h3>
-              <p>Closed by a maintainer, labelled as AI-generated</p>
-            </div>
-            <div class="contrib-body">
-              <p>Pack-quantised embeddings have no dense <code>.weight</code>, so <code>_init_weights</code> crashed while loading some NVFP4 checkpoints. The PR guarded that branch.</p>
-            </div>
-          </li>
-          <li>
-            <div class="contrib-id">
-              <h3><a href="https://github.com/PrimeIntellect-ai/prime-rl/pull/3416">prime-rl #3416</a></h3>
-              <p>Closed as stale</p>
-            </div>
-            <div class="contrib-body">
-              <p>Added the missing hardware check for FP8 blockwise quantisation, so unsupported GPUs fail early with a clear message.</p>
             </div>
           </li>
         </ol>
