@@ -26,7 +26,7 @@
     </div>
     <div class="main">
       <h1>My open source contributions.</h1>
-      <p class="lede page-lede">Most of this starts on my NVIDIA GB10, where newer hardware exposes assumptions that older GPUs never tested. I reproduce the failure, find the cause and send the fix. As of 1 November 2026, the pull requests featured here include 7 landed and 7 in review.</p>
+      <p class="lede page-lede">Most of this starts on my NVIDIA GB10, where newer hardware exposes assumptions that older GPUs never tested. I reproduce the failure, find the cause and send the fix. As of 1 November 2026, the pull requests featured here include 8 landed (including one co-authored PR) and 7 in review.</p>
       <ul class="links">
         <li><a href="#now">Accepted</a></li>
         <li><a href="#landed">Landed</a></li>
@@ -60,6 +60,16 @@
       <div class="margin"><h2>Landed</h2></div>
       <div class="main">
         <ol class="contrib">
+          <li>
+            <div class="contrib-id">
+              <h3><a href="https://github.com/pytorch/helion/pull/3963">PyTorch Helion #3963</a></h3>
+              <p><time datetime="2026-10-15">15 Oct 2026</time> · Co-author</p>
+            </div>
+            <div class="contrib-body">
+              <p>Output stores in <code>epilogue_subtile</code> could split along the wrong dimension, causing compilation failures. My fix in <a href="https://github.com/pytorch/helion/pull/3896">#3896</a> maps the split tile to its actual output dimension and leaves unsupported indexers unsplit. It landed as part of #3963, alongside fixes for static slices and runtime index lowering.</p>
+              <p class="contrib-status">Co-authored the <a href="https://github.com/pytorch/helion/commit/ff1a45cf3eb0106139e44b87223ab60cda191503">merged commit</a>.</p>
+            </div>
+          </li>
           <li>
             <div class="contrib-id">
               <h3><a href="https://github.com/pytorch/pytorch/commit/075742a095">PyTorch #196167</a></h3>
