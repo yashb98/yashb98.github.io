@@ -248,7 +248,7 @@ h3 { font: 600 1.1875rem/1.3 var(--display); }
 .builds dd { max-width: 60ch; }
 
 .timeline { background: var(--paper); border-top: 2px solid var(--ink); }
-.timeline li {
+.timeline > li {
   display: grid;
   grid-template-columns: minmax(0, 11em) minmax(0, 1fr);
   gap: 2px 24px;
@@ -256,6 +256,10 @@ h3 { font: 600 1.1875rem/1.3 var(--display); }
   border-bottom: 1px solid var(--rule);
 }
 .timeline .when { color: var(--ink-soft); }
+.timeline-role h3 { font: 600 1.0625rem/1.4 var(--body); }
+.timeline-role .role-meta { margin: 4px 0 10px; color: var(--ink-soft); font-size: 0.9375rem; }
+.role-highlights { margin-top: 10px; padding-left: 1.2em; list-style: disc; }
+.role-highlights li + li { margin-top: 8px; }
 
 footer.band .main { padding-bottom: 96px; }
 .closing { max-width: 22ch; font: 450 clamp(1.75rem, 3.6vw, 2.5rem)/1.15 var(--display); }
@@ -288,7 +292,7 @@ footer.band .main { padding-bottom: 96px; }
   .fp-plot { min-height: 30px; }
   .fp-plot::before { top: 0; bottom: -8px; }
   .offaxis { grid-template-columns: minmax(0, 1fr); gap: 28px; }
-  .ledger li, .builds > div, .timeline li { grid-template-columns: minmax(0, 1fr); }
+  .ledger li, .builds > div, .timeline > li { grid-template-columns: minmax(0, 1fr); }
   .ledger time { text-align: left; }
 }
 
