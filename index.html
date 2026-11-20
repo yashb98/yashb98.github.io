@@ -283,6 +283,16 @@ Required: 147456, Hardware limit: 101376.</code></pre>
       <div class="main">
         <ol class="ledger">
           <li>
+            <h3><a href="https://github.com/triton-lang/triton-cpu/pull/345">Triton CPU #345</a></h3>
+            <p>Fixed CPU option parsing so <code>TRITON_ALLOW_FP_FUSION=0</code> disables implicit multiply/add fusion as intended. Explicit <code>tl.fma</code> stays fused.</p>
+            <time datetime="2026-11-16">16 Nov 2026</time>
+          </li>
+          <li>
+            <h3><a href="https://github.com/graphcore-research/gfloat/pull/69">Graphcore gfloat #69</a></h3>
+            <p>Fixed Array API rounding that could return values a target format cannot represent. Added regressions across scalar, NumPy and strict Array API implementations.</p>
+            <time datetime="2026-11-08">8 Nov 2026</time>
+          </li>
+          <li>
             <h3><a href="https://github.com/pytorch/helion/pull/3963">PyTorch Helion #3963 · Co-author</a></h3>
             <p>Fixed output stores splitting along the wrong dimension in <code>epilogue_subtile</code>. My fix from <a href="https://github.com/pytorch/helion/pull/3896">#3896</a> was included in this merged PR, with co-author credit.</p>
             <time datetime="2026-10-15">15 Oct 2026</time>
@@ -308,7 +318,7 @@ Required: 147456, Hardware limit: 101376.</code></pre>
             <time datetime="2026-08-13">13 Aug 2026</time>
           </li>
         </ol>
-        <p class="more"><a href="contributions.html">See my landed pull requests and work in review</a>, with what each one fixes. My ONNX MatMul documentation patch has also been accepted through the ONNX Slack, and the public pull request is still to come.</p>
+        <p class="more"><a href="contributions.html">See my landed contributions, open pull requests and drafts</a>, with what each one fixes. Current work includes CPU tensor descriptor lowering, dataset creation retries and <a href="https://github.com/onnx/onnx/pull/8744">ONNX MatMul documentation</a>. Statuses checked on <time datetime="2026-11-20">20 November 2026</time>.</p>
       </div>
     </section>
 
